@@ -48,6 +48,8 @@ export default function WatchPage({ params }: { params: { slug: string; session:
   const [dlJob, setDlJob] = useState<DownloadJob | null>(null);
   const [dlStatus, setDlStatus] = useState<DownloadStatus>("idle");
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const hlsRef = useRef<any>(null);
 
   // Load stream
   useEffect(() => {
@@ -60,6 +62,52 @@ export default function WatchPage({ params }: { params: { slug: string; session:
       .catch(() => setStreamError("Failed to load stream. Is the backend running?"))
       .finally(() => setStreamLoading(false));
   }, [params.slug, params.session, quality, audio]);
+
+  // Init HLS player when stream is ready
+  useEffect(() => {
+    if (!stream || !videoRef.current) return;
+
+    const video = videoRef.current;
+    const src = stream.playlist_url;
+
+    // Destroy previous hls instance
+    if (hlsRef.current) {
+      hlsRef.current.destroy();
+      hlsRef.current = null;
+    }
+
+    // Native HLS support (Safari)
+    if (video.canPlayType("application/vnd.apple.mpegurl")) {
+      video.src = src;
+      video.play().catch(() => {});
+      return;
+    }
+
+    // hls.js for Chrome/Firefox
+    import("hls.js").then(({ default: Hls }) => {
+      if (!Hls.isSupported()) {
+        setStreamError("HLS not supported in this browser.");
+        return;
+      }
+      const hls = new Hls({ enableWorker: true });
+      hlsRef.current = hls;
+      hls.loadSource(src);
+      hls.attachMedia(video);
+      hls.on(Hls.Events.MANIFEST_PARSED, () => {
+        video.play().catch(() => {});
+      });
+      hls.on(Hls.Events.ERROR, (_: any, data: any) => {
+        if (data.fatal) setStreamError("Stream error: " + data.type);
+      });
+    });
+
+    return () => {
+      if (hlsRef.current) {
+        hlsRef.current.destroy();
+        hlsRef.current = null;
+      }
+    };
+  }, [stream]);
 
   // Poll download job
   const startPolling = useCallback((jobId: string) => {
@@ -121,7 +169,7 @@ export default function WatchPage({ params }: { params: { slug: string; session:
         <span className="text-white">Episode {ep}</span>
       </div>
 
-      {/* Title row */}
+      {/* Title + download button */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div className="flex items-center gap-3">
           <div className="w-1 h-7 rounded-full bg-ayo-gradient" />
@@ -130,57 +178,31 @@ export default function WatchPage({ params }: { params: { slug: string; session:
           </h1>
         </div>
 
-        {/* Download button */}
         <div className="flex flex-col items-end gap-1">
           <button
             onClick={handleDownload}
             disabled={isDownloading}
             className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all ${
-              dlStatus === "done"
-                ? "bg-green-600 hover:bg-green-500 text-white"
-                : dlStatus === "failed"
-                ? "bg-red-600 hover:bg-red-500 text-white"
-                : isDownloading
-                ? "bg-ayo-card border border-ayo-border text-ayo-muted cursor-not-allowed"
-                : "bg-ayo-gradient text-white ayo-glow hover:opacity-90"
+              dlStatus === "done" ? "bg-green-600 hover:bg-green-500 text-white" :
+              dlStatus === "failed" ? "bg-red-600 hover:bg-red-500 text-white" :
+              isDownloading ? "bg-ayo-card border border-ayo-border text-ayo-muted cursor-not-allowed" :
+              "bg-ayo-gradient text-white ayo-glow hover:opacity-90"
             }`}
           >
-            {dlStatus === "done" ? (
-              <>
-                <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-                {STATUS_LABEL[dlStatus]}
-              </>
-            ) : isDownloading ? (
-              <>
-                <div className="w-3.5 h-3.5 rounded-full border-2 border-ayo-border border-t-ayo-accent animate-spin" />
-                {STATUS_LABEL[dlStatus]}
-              </>
+            {isDownloading ? (
+              <><div className="w-3.5 h-3.5 rounded-full border-2 border-ayo-border border-t-ayo-accent animate-spin" />{STATUS_LABEL[dlStatus]}</>
+            ) : dlStatus === "done" ? (
+              <><svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" /></svg>{STATUS_LABEL[dlStatus]}</>
             ) : (
-              <>
-                <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                  <polyline points="7 10 12 15 17 10" />
-                  <line x1="12" y1="15" x2="12" y2="3" />
-                </svg>
-                {STATUS_LABEL[dlStatus]}
-              </>
+              <><svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>{STATUS_LABEL[dlStatus]}</>
             )}
           </button>
-
-          {/* Progress bar */}
           {isDownloading && (
             <div className="w-full h-1 bg-ayo-border rounded-full overflow-hidden">
-              <div
-                className="h-full bg-ayo-gradient transition-all duration-500 rounded-full"
-                style={{ width: `${dlProgress}%` }}
-              />
+              <div className="h-full bg-ayo-gradient transition-all duration-500 rounded-full" style={{ width: `${dlProgress}%` }} />
             </div>
           )}
-          {dlJob?.error && (
-            <p className="text-red-400 text-xs">{dlJob.error}</p>
-          )}
+          {dlJob?.error && <p className="text-red-400 text-xs">{dlJob.error}</p>}
         </div>
       </div>
 
@@ -200,67 +222,43 @@ export default function WatchPage({ params }: { params: { slug: string; session:
               </svg>
             </div>
             <p className="text-white font-semibold">{streamError}</p>
-            <p className="text-ayo-muted text-xs">Make sure the backend is running on port 8000</p>
           </div>
         )}
-        {!streamLoading && stream && (
-          <video key={stream.playlist_url} controls autoPlay className="w-full h-full" src={stream.playlist_url} />
-        )}
+        <video
+          ref={videoRef}
+          controls
+          className={`w-full h-full ${!stream || streamLoading ? "hidden" : ""}`}
+        />
       </div>
 
       {/* Controls */}
       <div className="flex flex-wrap gap-6 items-center bg-ayo-card border border-ayo-border rounded-xl px-5 py-4">
-        {/* Quality */}
         <div className="flex items-center gap-3">
           <span className="text-ayo-muted text-xs uppercase tracking-wider font-semibold">Quality</span>
           <div className="flex gap-1">
             {QUALITIES.map((q) => (
-              <button
-                key={q}
-                onClick={() => setQuality(q)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                  quality === q
-                    ? "bg-ayo-gradient text-white ayo-glow"
-                    : "bg-ayo-surface border border-ayo-border text-ayo-muted hover:text-white hover:border-ayo-accent"
-                }`}
-              >
+              <button key={q} onClick={() => setQuality(q)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${quality === q ? "bg-ayo-gradient text-white ayo-glow" : "bg-ayo-surface border border-ayo-border text-ayo-muted hover:text-white hover:border-ayo-accent"}`}>
                 {q === "best" ? "Best" : `${q}p`}
               </button>
             ))}
           </div>
         </div>
-
-        {/* Divider */}
         <div className="hidden sm:block w-px h-6 bg-ayo-border" />
-
-        {/* Audio */}
         <div className="flex items-center gap-3">
           <span className="text-ayo-muted text-xs uppercase tracking-wider font-semibold">Audio</span>
           <div className="flex gap-1">
             {AUDIOS.map((a) => (
-              <button
-                key={a.value}
-                onClick={() => setAudio(a.value)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                  audio === a.value
-                    ? "bg-ayo-gradient text-white ayo-glow"
-                    : "bg-ayo-surface border border-ayo-border text-ayo-muted hover:text-white hover:border-ayo-accent"
-                }`}
-              >
+              <button key={a.value} onClick={() => setAudio(a.value)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${audio === a.value ? "bg-ayo-gradient text-white ayo-glow" : "bg-ayo-surface border border-ayo-border text-ayo-muted hover:text-white hover:border-ayo-accent"}`}>
                 {a.label}
               </button>
             ))}
           </div>
         </div>
-
-        {/* Back */}
-        <Link
-          href={`/anime/${params.slug}?title=${encodeURIComponent(title)}`}
-          className="ml-auto flex items-center gap-2 text-ayo-muted hover:text-white transition-colors text-sm"
-        >
-          <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-            <path d="m15 18-6-6 6-6" />
-          </svg>
+        <Link href={`/anime/${params.slug}?title=${encodeURIComponent(title)}`}
+          className="ml-auto flex items-center gap-2 text-ayo-muted hover:text-white transition-colors text-sm">
+          <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6" /></svg>
           All Episodes
         </Link>
       </div>
@@ -269,18 +267,11 @@ export default function WatchPage({ params }: { params: { slug: string; session:
       {dlJob && dlStatus !== "idle" && (
         <div className="bg-ayo-card border border-ayo-border rounded-xl p-4 flex flex-col gap-3">
           <div className="flex items-center justify-between">
-            <span className="text-white font-semibold text-sm">
-              {title} — Episode {ep}
-            </span>
-            <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
-              dlStatus === "done" ? "bg-green-900/50 text-green-400" :
-              dlStatus === "failed" ? "bg-red-900/50 text-red-400" :
-              "bg-ayo-surface text-ayo-muted"
-            }`}>
+            <span className="text-white font-semibold text-sm">{title} — Episode {ep}</span>
+            <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${dlStatus === "done" ? "bg-green-900/50 text-green-400" : dlStatus === "failed" ? "bg-red-900/50 text-red-400" : "bg-ayo-surface text-ayo-muted"}`}>
               {dlStatus.toUpperCase()}
             </span>
           </div>
-
           {isDownloading && (
             <div className="flex flex-col gap-1.5">
               <div className="flex justify-between text-xs text-ayo-muted">
@@ -288,27 +279,17 @@ export default function WatchPage({ params }: { params: { slug: string; session:
                 <span>{dlProgress}%</span>
               </div>
               <div className="w-full h-2 bg-ayo-border rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-ayo-gradient transition-all duration-500 rounded-full"
-                  style={{ width: `${dlProgress}%` }}
-                />
+                <div className="h-full bg-ayo-gradient transition-all duration-500 rounded-full" style={{ width: `${dlProgress}%` }} />
               </div>
             </div>
           )}
-
           {dlStatus === "done" && dlJob.file_path && (
             <div className="flex items-center justify-between">
               <p className="text-ayo-muted text-xs font-mono truncate max-w-xs">{dlJob.file_path}</p>
-              <a
-                href={`${API_BASE}/api/download/${dlJob.job_id}/file`}
-                target="_blank"
-                rel="noreferrer"
-                className="flex items-center gap-1.5 text-xs font-bold text-ayo-accent hover:text-ayo-glow transition-colors shrink-0"
-              >
+              <a href={`${API_BASE}/api/download/${dlJob.job_id}/file`} target="_blank" rel="noreferrer"
+                className="flex items-center gap-1.5 text-xs font-bold text-ayo-accent hover:text-ayo-glow transition-colors shrink-0">
                 <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                  <polyline points="7 10 12 15 17 10" />
-                  <line x1="12" y1="15" x2="12" y2="3" />
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
                 </svg>
                 Save File
               </a>
