@@ -8,7 +8,6 @@ async function getAiring(): Promise<AnimeProp[]> {
     const res = await fetch(`${API_BASE}/api/airing`, { cache: "no-store" });
     if (!res.ok) return [];
     const json = await res.json();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return (json.data || []).map((item: any) => ({
       session: item.anime_session,
       title: item.anime_title,

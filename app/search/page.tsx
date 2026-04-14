@@ -9,7 +9,6 @@ async function searchAnime(q: string): Promise<AnimeProp[]> {
     });
     if (!res.ok) return [];
     const json = await res.json();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return (json.data || []).map((item: any) => ({
       session: item.session,
       title: item.title,
