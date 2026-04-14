@@ -1,0 +1,65 @@
+import Hero from "@/components/Hero";
+import AnimeCard, { AnimeProp } from "@/components/AnimeCard";
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
+async function getAiring(): Promise<AnimeProp[]> {
+  try {
+    const res = await fetch(`${API_BASE}/api/airing`, { cache: "no-store" });
+    if (!res.ok) return [];
+    const json = await res.json();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return (json.data || []).map((item: any) => ({
+      session: item.anime_session,
+      title: item.anime_title,
+      poster: item.snapshot,
+      type: item.fansub || "TV",
+      episodes: item.episode,
+    }));
+  } catch {
+    return [];
+  }
+}
+
+export default async function Home() {
+  const airing = await getAiring();
+
+  return (
+    <>
+      <Hero />
+      <main className="max-w-7xl mx-auto px-6 py-12 flex flex-col gap-12">
+        {/* Section header */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-1 h-6 rounded-full bg-ayo-gradient" />
+            <h2 className="text-2xl font-black text-white">Currently Airing</h2>
+          </div>
+          <span className="text-ayo-muted text-sm">
+            {airing.length > 0 ? `${airing.length} shows` : ""}
+          </span>
+        </div>
+
+        {airing.length > 0 ? (
+          <section className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-5">
+            {airing.map((item) => (
+              <AnimeCard key={item.session} anime={item} />
+            ))}
+          </section>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-20 gap-4 text-center">
+            <div className="w-16 h-16 rounded-full bg-ayo-card border border-ayo-border flex items-center justify-center">
+              <svg width="28" height="28" fill="none" stroke="#64748b" strokeWidth="1.5" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" />
+                <path d="M12 8v4M12 16h.01" />
+              </svg>
+            </div>
+            <p className="text-ayo-muted text-lg font-semibold">Backend not connected</p>
+            <p className="text-ayo-muted text-sm max-w-sm">
+              Start the FastAPI backend on port 8000 to load live anime data.
+            </p>
+          </div>
+        )}
+      </main>
+    </>
+  );
+}

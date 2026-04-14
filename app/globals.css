@@ -1,0 +1,120 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --ayo-bg: #0a0a0f;
+  --ayo-surface: #12121a;
+  --ayo-card: #1a1a26;
+  --ayo-border: #2a2a3d;
+  --ayo-accent: #7c3aed;
+  --ayo-accent-glow: #9d5cff;
+  --ayo-pink: #ec4899;
+  --ayo-text: #e2e8f0;
+  --ayo-muted: #64748b;
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--ayo-bg);
+  color: var(--ayo-text);
+  font-family: inherit;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--ayo-bg); }
+::-webkit-scrollbar-thumb { background: var(--ayo-border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--ayo-accent); }
+
+/* Gradient text */
+.ayo-gradient {
+  background: linear-gradient(135deg, #7c3aed 0%, #ec4899 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Glow effects */
+.ayo-glow {
+  box-shadow: 0 0 20px rgba(124, 58, 237, 0.4);
+}
+
+.ayo-glow-pink {
+  box-shadow: 0 0 20px rgba(236, 72, 153, 0.4);
+}
+
+/* Card hover */
+.anime-card:hover .card-overlay {
+  opacity: 1;
+}
+
+.anime-card:hover .card-img {
+  transform: scale(1.05);
+}
+
+.card-img {
+  transition: transform 0.4s ease;
+}
+
+.card-overlay {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+/* Shimmer loading */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.shimmer {
+  background: linear-gradient(90deg, var(--ayo-card) 25%, var(--ayo-border) 50%, var(--ayo-card) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Nav blur */
+.nav-blur {
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* Hero gradient overlay */
+.hero-overlay {
+  background: linear-gradient(
+    to bottom,
+    rgba(10, 10, 15, 0.3) 0%,
+    rgba(10, 10, 15, 0.6) 60%,
+    rgba(10, 10, 15, 1) 100%
+  );
+}
+
+/* Episode grid hover */
+.ep-card:hover {
+  border-color: var(--ayo-accent);
+  transform: translateY(-2px);
+}
+
+.ep-card {
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+/* Video player */
+video {
+  background: #000;
+}
+
+/* Pulse dot */
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.pulse-dot {
+  animation: pulse-dot 1.5s ease-in-out infinite;
+}
