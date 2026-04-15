@@ -70,38 +70,46 @@ export default function WatchPage({ params }: { params: { slug: string; session:
     const video = videoRef.current;
     const src = stream.playlist_url;
 
-    // Destroy previous hls instance
     if (hlsRef.current) {
       hlsRef.current.destroy();
       hlsRef.current = null;
     }
 
-    // Native HLS support (Safari)
-    if (video.canPlayType("application/vnd.apple.mpegurl")) {
-      video.src = src;
-      video.play().catch(() => {});
-      return;
-    }
-
-    // hls.js for Chrome/Firefox
-    import("hls.js").then(({ default: Hls }) => {
-      if (!Hls.isSupported()) {
-        setStreamError("HLS not supported in this browser.");
+    const initPlayer = () => {
+      // Native HLS (Safari)
+      if (video.canPlayType("application/vnd.apple.mpegurl")) {
+        video.src = src;
+        video.play().catch(() => {});
         return;
       }
-      const hls = new Hls({ enableWorker: true });
-      hlsRef.current = hls;
-      hls.loadSource(src);
-      hls.attachMedia(video);
-      hls.on(Hls.Events.MANIFEST_PARSED, () => {
-        video.play().catch(() => {});
-      });
-      hls.on(Hls.Events.ERROR, (_: any, data: any) => {
-        if (data.fatal) setStreamError("Stream error: " + data.type);
-      });
-    });
 
+      // hls.js for Chrome/Firefox
+      import("hls.js").then(({ default: Hls }) => {
+        if (!Hls.isSupported()) {
+          setStreamError("HLS not supported in this browser.");
+          return;
+        }
+        const hls = new Hls({ enableWorker: true, xhrSetup: (xhr) => {
+          xhr.withCredentials = false;
+        }});
+        hlsRef.current = hls;
+        hls.loadSource(src);
+        hls.attachMedia(video);
+        hls.on(Hls.Events.MANIFEST_PARSED, () => {
+          video.play().catch(() => {});
+        });
+        hls.on(Hls.Events.ERROR, (_: any, data: any) => {
+          if (data.fatal) {
+            setStreamError("Stream error — try a different quality.");
+          }
+        });
+      });
+    };
+
+    // Small delay to ensure video element is mounted and visible
+    const t = setTimeout(initPlayer, 100);
     return () => {
+      clearTimeout(t);
       if (hlsRef.current) {
         hlsRef.current.destroy();
         hlsRef.current = null;
@@ -232,7 +240,8 @@ export default function WatchPage({ params }: { params: { slug: string; session:
         <video
           ref={videoRef}
           controls
-          className={`w-full h-full ${!stream || streamLoading ? "hidden" : ""}`}
+          className="w-full h-full"
+          style={{ display: (!stream || streamLoading) ? "none" : "block" }}
         />
       </div>
 
