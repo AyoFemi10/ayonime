@@ -115,6 +115,11 @@ export default function WatchPage({ params }: { params: { slug: string; session:
     pollRef.current = setInterval(async () => {
       try {
         const r = await fetch(`${API_BASE}/api/download/${jobId}/status`);
+        if (!r.ok) {
+          clearInterval(pollRef.current!);
+          setDlStatus("failed");
+          return;
+        }
         const job: DownloadJob = await r.json();
         setDlJob(job);
         setDlStatus(job.status);

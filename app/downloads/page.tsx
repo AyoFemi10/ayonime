@@ -122,8 +122,8 @@ export default function DownloadsPage() {
                   </p>
                   <p className="text-ayo-muted text-xs">Episode {job.episode_number}</p>
                 </div>
-                <span className={`text-xs font-bold px-2.5 py-1 rounded-full shrink-0 ${STATUS_COLOR[job.status]}`}>
-                  {job.status.toUpperCase()}
+                <span className={`text-xs font-bold px-2.5 py-1 rounded-full shrink-0 ${STATUS_COLOR[job.status] || "text-gray-400 bg-gray-900/30"}`}>
+                  {job.status?.toUpperCase() ?? "UNKNOWN"}
                 </span>
               </div>
 
