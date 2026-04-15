@@ -28,7 +28,7 @@ export default function Navbar() {
           <div className="w-8 h-8 rounded-lg bg-ayo-gradient flex items-center justify-center ayo-glow">
             <span className="text-white font-black text-sm">A</span>
           </div>
-          <span className="text-white font-black text-xl tracking-tight hidden xs:block">
+          <span className="text-white font-black text-xl tracking-tight">
             AYO<span className="ayo-gradient">NIME</span>
           </span>
         </Link>
