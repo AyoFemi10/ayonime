@@ -11,14 +11,14 @@ interface PageData {
   current_page: number;
 }
 
-export default function RecentlyAdded() {
+export default function LatestRelease() {
   const [page, setPage] = useState(1);
   const [pageData, setPageData] = useState<PageData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     setLoading(true);
-    fetch(`${API_BASE}/api/recently-added?page=${page}`)
+    fetch(`${API_BASE}/api/latest-release?page=${page}`)
       .then((r) => r.json())
       .then((d) => setPageData(d))
       .catch(() => setPageData(null))
@@ -46,7 +46,7 @@ export default function RecentlyAdded() {
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-3">
           <div className="w-1 h-6 rounded-full bg-ayo-gradient" />
-          <h2 className="text-xl sm:text-2xl font-black text-white">Recently Added</h2>
+          <h2 className="text-xl sm:text-2xl font-black text-white">Latest Release</h2>
         </div>
         {lastPage > 1 && (
           <span className="text-ayo-muted text-xs">Page {page} of {lastPage}</span>

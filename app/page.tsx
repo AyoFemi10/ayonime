@@ -1,6 +1,6 @@
 import Hero from "@/components/Hero";
 import AnimeCard, { AnimeProp } from "@/components/AnimeCard";
-import RecentlyAdded from "@/components/RecentlyAdded";
+import LatestRelease from "@/components/LatestRelease";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -83,8 +83,8 @@ export default async function Home() {
           </section>
         )}
 
-        {/* Recently Added — paginated client component */}
-        <RecentlyAdded />
+        {/* Latest Release — paginated client component */}
+        <LatestRelease />
 
       </main>
     </>
