@@ -56,11 +56,12 @@ export default function WatchPage({ params }: { params: { slug: string; session:
       .then((d) => {
         if (d.detail) setStreamError(d.detail);
         else {
-          // stream_url is the /api/player?token=... path
           const playerUrl = d.stream_url?.startsWith("/")
             ? `${API_BASE}${d.stream_url}`
             : d.stream_url;
           setStreamUrl(playerUrl);
+          // Save last watched episode for this anime
+          try { localStorage.setItem(`last_watched_${params.slug}`, params.session); } catch {}
         }
       })
       .catch(() => setStreamError("Failed to load stream. Is the backend running?"))
@@ -180,6 +181,31 @@ export default function WatchPage({ params }: { params: { slug: string; session:
             </div>
             <p className="text-white font-semibold">{streamError}</p>
             <p className="text-ayo-muted text-xs">Make sure the backend is running</p>
+            <button
+              onClick={() => {
+                setStreamLoading(true);
+                setStreamError("");
+                setStreamUrl(null);
+                fetch(`${API_BASE}/api/stream?anime_slug=${params.slug}&episode_session=${params.session}&quality=${quality}&audio=${audio}`)
+                  .then((r) => r.json())
+                  .then((d) => {
+                    if (d.detail) setStreamError(d.detail);
+                    else {
+                      const playerUrl = d.stream_url?.startsWith("/") ? `${API_BASE}${d.stream_url}` : d.stream_url;
+                      setStreamUrl(playerUrl);
+                      try { localStorage.setItem(`last_watched_${params.slug}`, params.session); } catch {}
+                    }
+                  })
+                  .catch(() => setStreamError("Failed to load stream. Is the backend running?"))
+                  .finally(() => setStreamLoading(false));
+              }}
+              className="flex items-center gap-2 px-5 py-2 rounded-xl bg-ayo-gradient text-white text-sm font-bold ayo-glow hover:opacity-90 transition-opacity"
+            >
+              <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                <path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+              </svg>
+              Retry
+            </button>
           </div>
         )}
         {!streamLoading && streamUrl && (

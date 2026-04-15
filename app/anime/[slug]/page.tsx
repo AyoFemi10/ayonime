@@ -1,4 +1,5 @@
 import Link from "next/link";
+import EpisodeGrid from "@/components/EpisodeGrid";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -37,23 +38,17 @@ export default async function AnimePage({
 
   return (
     <main className="max-w-7xl mx-auto px-3 sm:px-6 pt-20 sm:pt-28 pb-16 flex flex-col gap-6 sm:gap-8">
-      {/* Back + title */}
       <div className="flex flex-col gap-3 sm:gap-4">
-        <Link
-          href="/"
-          className="flex items-center gap-2 text-ayo-muted hover:text-white transition-colors text-sm w-fit"
-        >
+        <Link href="/" className="flex items-center gap-2 text-ayo-muted hover:text-white transition-colors text-sm w-fit">
           <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
             <path d="m15 18-6-6 6-6" />
           </svg>
           Back
         </Link>
-
         <div className="flex items-center gap-3">
           <div className="w-1 h-8 rounded-full bg-ayo-gradient shrink-0" />
           <h1 className="text-2xl sm:text-3xl font-black text-white">{title}</h1>
         </div>
-
         <p className="text-ayo-muted text-sm pl-4">
           {episodes.length} episode{episodes.length !== 1 ? "s" : ""}
         </p>
@@ -70,36 +65,7 @@ export default async function AnimePage({
           <p className="text-ayo-muted text-lg font-semibold">No episodes found</p>
         </div>
       ) : (
-        <section className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
-          {episodes.map((ep) => (
-            <Link
-              key={ep.session}
-              href={`/watch/${params.slug}/${ep.session}?title=${encodeURIComponent(title)}&ep=${ep.episode}`}
-              className="ep-card group bg-ayo-card border border-ayo-border rounded-xl overflow-hidden flex flex-col"
-            >
-              {ep.snapshot ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={ep.snapshot}
-                  alt={`Episode ${ep.episode}`}
-                  className="w-full aspect-video object-cover"
-                />
-              ) : (
-                <div className="w-full aspect-video bg-ayo-surface flex items-center justify-center">
-                  <svg width="24" height="24" fill="none" stroke="#2a2a3d" strokeWidth="1.5" viewBox="0 0 24 24">
-                    <polygon points="5 3 19 12 5 21 5 3" />
-                  </svg>
-                </div>
-              )}
-              <div className="p-3 flex flex-col gap-1">
-                <span className="text-white font-bold text-sm">Ep {ep.episode}</span>
-                {ep.duration && (
-                  <span className="text-ayo-muted text-xs">{ep.duration}</span>
-                )}
-              </div>
-            </Link>
-          ))}
-        </section>
+        <EpisodeGrid episodes={episodes} slug={params.slug} title={title} />
       )}
     </main>
   );
