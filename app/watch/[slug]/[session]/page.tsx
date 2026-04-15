@@ -6,11 +6,6 @@ import { useSearchParams } from "next/navigation";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
-interface StreamData {
-  stream_url: string;
-  playlist_url: string;
-}
-
 type DownloadStatus = "idle" | "queued" | "resolving" | "downloading" | "compiling" | "done" | "failed";
 
 interface DownloadJob {
@@ -39,7 +34,7 @@ export default function WatchPage({ params }: { params: { slug: string; session:
   const title = searchParams.get("title") || params.slug;
   const ep = searchParams.get("ep") || "?";
 
-  const [stream, setStream] = useState<StreamData | null>(null);
+  const [streamUrl, setStreamUrl] = useState<string | null>(null);
   const [streamLoading, setStreamLoading] = useState(true);
   const [streamError, setStreamError] = useState("");
   const [quality, setQuality] = useState("best");
@@ -48,83 +43,23 @@ export default function WatchPage({ params }: { params: { slug: string; session:
   const [dlJob, setDlJob] = useState<DownloadJob | null>(null);
   const [dlStatus, setDlStatus] = useState<DownloadStatus>("idle");
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const hlsRef = useRef<any>(null);
 
-  // Load stream
+  // Load stream — get kwik embed URL
   useEffect(() => {
     setStreamLoading(true);
     setStreamError("");
-    setStream(null);
-    fetch(`${API_BASE}/api/stream?anime_slug=${params.slug}&episode_session=${params.session}&quality=${quality}&audio=${audio}`)
+    setStreamUrl(null);
+    fetch(
+      `${API_BASE}/api/stream?anime_slug=${params.slug}&episode_session=${params.session}&quality=${quality}&audio=${audio}`
+    )
       .then((r) => r.json())
       .then((d) => {
         if (d.detail) setStreamError(d.detail);
-        else {
-          // playlist_url may be a relative path — prefix with API base
-          const pl = d.playlist_url?.startsWith("/")
-            ? `${API_BASE}${d.playlist_url}`
-            : d.playlist_url;
-          setStream({ ...d, playlist_url: pl });
-        }
+        else setStreamUrl(d.stream_url);
       })
       .catch(() => setStreamError("Failed to load stream. Is the backend running?"))
       .finally(() => setStreamLoading(false));
   }, [params.slug, params.session, quality, audio]);
-
-  // Init HLS player when stream is ready
-  useEffect(() => {
-    if (!stream || !videoRef.current) return;
-
-    const video = videoRef.current;
-    const src = stream.playlist_url;
-
-    if (hlsRef.current) {
-      hlsRef.current.destroy();
-      hlsRef.current = null;
-    }
-
-    const initPlayer = () => {
-      // Native HLS (Safari)
-      if (video.canPlayType("application/vnd.apple.mpegurl")) {
-        video.src = src;
-        video.play().catch(() => {});
-        return;
-      }
-
-      // hls.js for Chrome/Firefox
-      import("hls.js").then(({ default: Hls }) => {
-        if (!Hls.isSupported()) {
-          setStreamError("HLS not supported in this browser.");
-          return;
-        }
-        const hls = new Hls({ enableWorker: true, xhrSetup: (xhr) => {
-          xhr.withCredentials = false;
-        }});
-        hlsRef.current = hls;
-        hls.loadSource(src);
-        hls.attachMedia(video);
-        hls.on(Hls.Events.MANIFEST_PARSED, () => {
-          video.play().catch(() => {});
-        });
-        hls.on(Hls.Events.ERROR, (_: any, data: any) => {
-          if (data.fatal) {
-            setStreamError("Stream error — try a different quality.");
-          }
-        });
-      });
-    };
-
-    // Small delay to ensure video element is mounted and visible
-    const t = setTimeout(initPlayer, 100);
-    return () => {
-      clearTimeout(t);
-      if (hlsRef.current) {
-        hlsRef.current.destroy();
-        hlsRef.current = null;
-      }
-    };
-  }, [stream]);
 
   // Poll download job
   const startPolling = useCallback((jobId: string) => {
@@ -132,17 +67,11 @@ export default function WatchPage({ params }: { params: { slug: string; session:
     pollRef.current = setInterval(async () => {
       try {
         const r = await fetch(`${API_BASE}/api/download/${jobId}/status`);
-        if (!r.ok) {
-          clearInterval(pollRef.current!);
-          setDlStatus("failed");
-          return;
-        }
+        if (!r.ok) { clearInterval(pollRef.current!); setDlStatus("failed"); return; }
         const job: DownloadJob = await r.json();
         setDlJob(job);
         setDlStatus(job.status);
-        if (job.status === "done" || job.status === "failed") {
-          clearInterval(pollRef.current!);
-        }
+        if (job.status === "done" || job.status === "failed") clearInterval(pollRef.current!);
       } catch { /* ignore */ }
     }, 1500);
   }, []);
@@ -200,11 +129,11 @@ export default function WatchPage({ params }: { params: { slug: string; session:
           </h1>
         </div>
 
-        <div className="flex flex-col items-end gap-1">
+        <div className="flex flex-col items-end gap-1 min-w-[160px]">
           <button
             onClick={handleDownload}
             disabled={isDownloading}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all ${
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all w-full justify-center ${
               dlStatus === "done" ? "bg-green-600 hover:bg-green-500 text-white" :
               dlStatus === "failed" ? "bg-red-600 hover:bg-red-500 text-white" :
               isDownloading ? "bg-ayo-card border border-ayo-border text-ayo-muted cursor-not-allowed" :
@@ -228,7 +157,7 @@ export default function WatchPage({ params }: { params: { slug: string; session:
         </div>
       </div>
 
-      {/* Player */}
+      {/* Player — kwik iframe embedded seamlessly */}
       <div className="w-full aspect-video bg-black rounded-2xl overflow-hidden border border-ayo-border relative">
         {streamLoading && (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-ayo-bg">
@@ -244,14 +173,19 @@ export default function WatchPage({ params }: { params: { slug: string; session:
               </svg>
             </div>
             <p className="text-white font-semibold">{streamError}</p>
+            <p className="text-ayo-muted text-xs">Make sure the backend is running</p>
           </div>
         )}
-        <video
-          ref={videoRef}
-          controls
-          className="w-full h-full"
-          style={{ display: (!stream || streamLoading) ? "none" : "block" }}
-        />
+        {!streamLoading && streamUrl && (
+          <iframe
+            src={streamUrl}
+            className="w-full h-full"
+            allowFullScreen
+            allow="autoplay; fullscreen"
+            referrerPolicy="no-referrer"
+            sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+          />
+        )}
       </div>
 
       {/* Controls */}
@@ -292,7 +226,7 @@ export default function WatchPage({ params }: { params: { slug: string; session:
           <div className="flex items-center justify-between">
             <span className="text-white font-semibold text-sm">{title} — Episode {ep}</span>
             <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${dlStatus === "done" ? "bg-green-900/50 text-green-400" : dlStatus === "failed" ? "bg-red-900/50 text-red-400" : "bg-ayo-surface text-ayo-muted"}`}>
-              {dlStatus.toUpperCase()}
+              {dlStatus?.toUpperCase()}
             </span>
           </div>
           {isDownloading && (
