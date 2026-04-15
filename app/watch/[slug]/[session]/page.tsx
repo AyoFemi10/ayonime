@@ -184,7 +184,7 @@ export default function WatchPage({ params }: { params: { slug: string; session:
         )}
         {!streamLoading && streamUrl && (
           <iframe
-            src={`${API_BASE}${streamUrl}`}
+            src={streamUrl}
             className="w-full h-full"
             allowFullScreen
             allow="autoplay; fullscreen; encrypted-media"
