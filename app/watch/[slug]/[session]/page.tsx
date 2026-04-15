@@ -56,9 +56,10 @@ export default function WatchPage({ params }: { params: { slug: string; session:
       .then((d) => {
         if (d.detail) setStreamError(d.detail);
         else {
-          const playerUrl = d.playlist_url?.startsWith("/")
-            ? `${API_BASE}${d.playlist_url}`
-            : d.playlist_url;
+          // stream_url is the /api/player?token=... path
+          const playerUrl = d.stream_url?.startsWith("/")
+            ? `${API_BASE}${d.stream_url}`
+            : d.stream_url;
           setStreamUrl(playerUrl);
         }
       })
@@ -186,9 +187,9 @@ export default function WatchPage({ params }: { params: { slug: string; session:
             src={`${API_BASE}${streamUrl}`}
             className="w-full h-full"
             allowFullScreen
-            allow="autoplay; fullscreen"
+            allow="autoplay; fullscreen; encrypted-media"
             referrerPolicy="no-referrer"
-            sandbox="allow-scripts allow-same-origin allow-forms"
+            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
           />
         )}
       </div>
