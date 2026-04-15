@@ -11,6 +11,12 @@ export const metadata: Metadata = {
   description: "Stream and download anime in HD. Your ultimate anime destination.",
 };
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+};
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">

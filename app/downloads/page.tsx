@@ -55,7 +55,7 @@ export default function DownloadsPage() {
   const hasActive = jobs.some((j) => ACTIVE.includes(j.status));
 
   return (
-    <main className="max-w-4xl mx-auto px-6 pt-28 pb-16 flex flex-col gap-8">
+    <main className="max-w-4xl mx-auto px-3 sm:px-6 pt-20 sm:pt-28 pb-16 flex flex-col gap-6 sm:gap-8">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">

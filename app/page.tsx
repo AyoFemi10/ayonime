@@ -26,12 +26,12 @@ export default async function Home() {
   return (
     <>
       <Hero />
-      <main className="max-w-7xl mx-auto px-6 py-12 flex flex-col gap-12">
+      <main className="max-w-7xl mx-auto px-3 sm:px-6 py-8 sm:py-12 flex flex-col gap-8 sm:gap-12">
         {/* Section header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-1 h-6 rounded-full bg-ayo-gradient" />
-            <h2 className="text-2xl font-black text-white">Currently Airing</h2>
+            <h2 className="text-xl sm:text-2xl font-black text-white">Currently Airing</h2>
           </div>
           <span className="text-ayo-muted text-sm">
             {airing.length > 0 ? `${airing.length} shows` : ""}
@@ -39,7 +39,7 @@ export default async function Home() {
         </div>
 
         {airing.length > 0 ? (
-          <section className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-5">
+          <section className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-5">
             {airing.map((item) => (
               <AnimeCard key={item.session} anime={item} />
             ))}

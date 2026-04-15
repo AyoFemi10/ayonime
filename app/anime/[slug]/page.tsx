@@ -36,9 +36,9 @@ export default async function AnimePage({
   const episodes = await getEpisodes(params.slug, title);
 
   return (
-    <main className="max-w-7xl mx-auto px-6 pt-28 pb-16 flex flex-col gap-8">
+    <main className="max-w-7xl mx-auto px-3 sm:px-6 pt-20 sm:pt-28 pb-16 flex flex-col gap-6 sm:gap-8">
       {/* Back + title */}
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-3 sm:gap-4">
         <Link
           href="/"
           className="flex items-center gap-2 text-ayo-muted hover:text-white transition-colors text-sm w-fit"
@@ -50,8 +50,8 @@ export default async function AnimePage({
         </Link>
 
         <div className="flex items-center gap-3">
-          <div className="w-1 h-8 rounded-full bg-ayo-gradient" />
-          <h1 className="text-3xl font-black text-white">{title}</h1>
+          <div className="w-1 h-8 rounded-full bg-ayo-gradient shrink-0" />
+          <h1 className="text-2xl sm:text-3xl font-black text-white">{title}</h1>
         </div>
 
         <p className="text-ayo-muted text-sm pl-4">
@@ -70,7 +70,7 @@ export default async function AnimePage({
           <p className="text-ayo-muted text-lg font-semibold">No episodes found</p>
         </div>
       ) : (
-        <section className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+        <section className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
           {episodes.map((ep) => (
             <Link
               key={ep.session}

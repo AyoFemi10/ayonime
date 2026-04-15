@@ -114,12 +114,12 @@ export default function WatchPage({ params }: { params: { slug: string; session:
   const dlProgress = dlJob?.progress ?? 0;
 
   return (
-    <main className="max-w-7xl mx-auto px-6 pt-24 pb-16 flex flex-col gap-6">
+    <main className="max-w-7xl mx-auto px-3 sm:px-6 pt-20 pb-16 flex flex-col gap-4 sm:gap-6">
       {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-sm text-ayo-muted flex-wrap">
+      <div className="flex items-center gap-2 text-xs sm:text-sm text-ayo-muted flex-wrap">
         <Link href="/" className="hover:text-white transition-colors">Home</Link>
         <span>/</span>
-        <Link href={`/anime/${params.slug}?title=${encodeURIComponent(title)}`} className="hover:text-white transition-colors line-clamp-1 max-w-[200px]">
+        <Link href={`/anime/${params.slug}?title=${encodeURIComponent(title)}`} className="hover:text-white transition-colors line-clamp-1 max-w-[140px] sm:max-w-[200px]">
           {title}
         </Link>
         <span>/</span>
@@ -127,19 +127,19 @@ export default function WatchPage({ params }: { params: { slug: string; session:
       </div>
 
       {/* Title + download button */}
-      <div className="flex items-center justify-between flex-wrap gap-4">
-        <div className="flex items-center gap-3">
-          <div className="w-1 h-7 rounded-full bg-ayo-gradient" />
-          <h1 className="text-xl font-black text-white">
+      <div className="flex items-start sm:items-center justify-between flex-wrap gap-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-1 h-7 rounded-full bg-ayo-gradient shrink-0" />
+          <h1 className="text-base sm:text-xl font-black text-white truncate">
             {title} <span className="text-ayo-muted font-normal">— Ep {ep}</span>
           </h1>
         </div>
 
-        <div className="flex flex-col items-end gap-1 min-w-[160px]">
+        <div className="flex flex-col items-end gap-1 w-full sm:w-auto sm:min-w-[160px]">
           <button
             onClick={handleDownload}
             disabled={isDownloading}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all w-full justify-center ${
+            className={`flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl font-bold text-sm transition-all w-full sm:w-auto justify-center ${
               dlStatus === "done" ? "bg-green-600 hover:bg-green-500 text-white" :
               dlStatus === "failed" ? "bg-red-600 hover:bg-red-500 text-white" :
               isDownloading ? "bg-ayo-card border border-ayo-border text-ayo-muted cursor-not-allowed" :
@@ -187,40 +187,40 @@ export default function WatchPage({ params }: { params: { slug: string; session:
             src={streamUrl}
             className="w-full h-full"
             allowFullScreen
-            allow="autoplay; fullscreen; encrypted-media"
+            allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
             referrerPolicy="no-referrer"
-            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
+            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-presentation"
           />
         )}
       </div>
 
       {/* Controls */}
-      <div className="flex flex-wrap gap-6 items-center bg-ayo-card border border-ayo-border rounded-xl px-5 py-4">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-wrap gap-4 sm:gap-6 items-center bg-ayo-card border border-ayo-border rounded-xl px-4 sm:px-5 py-3 sm:py-4">
+        <div className="flex items-center gap-2 sm:gap-3">
           <span className="text-ayo-muted text-xs uppercase tracking-wider font-semibold">Quality</span>
-          <div className="flex gap-1">
+          <div className="flex gap-1 flex-wrap">
             {QUALITIES.map((q) => (
               <button key={q} onClick={() => setQuality(q)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${quality === q ? "bg-ayo-gradient text-white ayo-glow" : "bg-ayo-surface border border-ayo-border text-ayo-muted hover:text-white hover:border-ayo-accent"}`}>
+                className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-bold transition-all ${quality === q ? "bg-ayo-gradient text-white ayo-glow" : "bg-ayo-surface border border-ayo-border text-ayo-muted hover:text-white hover:border-ayo-accent"}`}>
                 {q === "best" ? "Best" : `${q}p`}
               </button>
             ))}
           </div>
         </div>
         <div className="hidden sm:block w-px h-6 bg-ayo-border" />
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <span className="text-ayo-muted text-xs uppercase tracking-wider font-semibold">Audio</span>
           <div className="flex gap-1">
             {AUDIOS.map((a) => (
               <button key={a.value} onClick={() => setAudio(a.value)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${audio === a.value ? "bg-ayo-gradient text-white ayo-glow" : "bg-ayo-surface border border-ayo-border text-ayo-muted hover:text-white hover:border-ayo-accent"}`}>
+                className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-bold transition-all ${audio === a.value ? "bg-ayo-gradient text-white ayo-glow" : "bg-ayo-surface border border-ayo-border text-ayo-muted hover:text-white hover:border-ayo-accent"}`}>
                 {a.label}
               </button>
             ))}
           </div>
         </div>
         <Link href={`/anime/${params.slug}?title=${encodeURIComponent(title)}`}
-          className="ml-auto flex items-center gap-2 text-ayo-muted hover:text-white transition-colors text-sm">
+          className="sm:ml-auto flex items-center gap-2 text-ayo-muted hover:text-white transition-colors text-sm">
           <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6" /></svg>
           All Episodes
         </Link>

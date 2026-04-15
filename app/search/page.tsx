@@ -31,12 +31,12 @@ export default async function SearchPage({
   const results = q ? await searchAnime(q) : [];
 
   return (
-    <main className="max-w-7xl mx-auto px-6 pt-28 pb-16 flex flex-col gap-8">
+    <main className="max-w-7xl mx-auto px-3 sm:px-6 pt-20 sm:pt-28 pb-16 flex flex-col gap-6 sm:gap-8">
       {/* Header */}
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-3">
           <div className="w-1 h-6 rounded-full bg-ayo-gradient" />
-          <h1 className="text-2xl font-black text-white">
+          <h1 className="text-xl sm:text-2xl font-black text-white">
             {q ? `Results for "${q}"` : "Browse Anime"}
           </h1>
         </div>
@@ -48,7 +48,7 @@ export default async function SearchPage({
       </div>
 
       {results.length > 0 ? (
-        <section className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-5 animate-fade-in">
+        <section className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-5 animate-fade-in">
           {results.map((item) => (
             <AnimeCard key={item.session} anime={item} />
           ))}
