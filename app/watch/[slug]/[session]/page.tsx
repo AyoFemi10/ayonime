@@ -58,7 +58,16 @@ export default function WatchPage({ params }: { params: { slug: string; session:
     setStream(null);
     fetch(`${API_BASE}/api/stream?anime_slug=${params.slug}&episode_session=${params.session}&quality=${quality}&audio=${audio}`)
       .then((r) => r.json())
-      .then((d) => { if (d.detail) setStreamError(d.detail); else setStream(d); })
+      .then((d) => {
+        if (d.detail) setStreamError(d.detail);
+        else {
+          // playlist_url may be a relative path — prefix with API base
+          const pl = d.playlist_url?.startsWith("/")
+            ? `${API_BASE}${d.playlist_url}`
+            : d.playlist_url;
+          setStream({ ...d, playlist_url: pl });
+        }
+      })
       .catch(() => setStreamError("Failed to load stream. Is the backend running?"))
       .finally(() => setStreamLoading(false));
   }, [params.slug, params.session, quality, audio]);

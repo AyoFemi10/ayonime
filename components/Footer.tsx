@@ -38,7 +38,7 @@ export default function Footer() {
       </div>
 
       <div className="border-t border-ayo-border px-6 py-4 max-w-7xl mx-auto flex justify-between items-center">
-        <p className="text-ayo-muted text-xs">© 2025 AYONIME. For personal use only.</p>
+        <p className="text-ayo-muted text-xs">© 2026 AYOMIKUN DEV CORP. For personal use only.</p>
         <p className="text-ayo-muted text-xs">Powered by AnimePahe</p>
       </div>
     </footer>
