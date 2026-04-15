@@ -178,12 +178,12 @@ export default function WatchPage({ params }: { params: { slug: string; session:
         )}
         {!streamLoading && streamUrl && (
           <iframe
-            src={streamUrl}
+            src={`${API_BASE}${streamUrl}`}
             className="w-full h-full"
             allowFullScreen
             allow="autoplay; fullscreen"
             referrerPolicy="no-referrer"
-            sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+            sandbox="allow-scripts allow-same-origin allow-forms"
           />
         )}
       </div>
