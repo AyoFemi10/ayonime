@@ -55,7 +55,12 @@ export default function WatchPage({ params }: { params: { slug: string; session:
       .then((r) => r.json())
       .then((d) => {
         if (d.detail) setStreamError(d.detail);
-        else setStreamUrl(d.stream_url);
+        else {
+          const playerUrl = d.playlist_url?.startsWith("/")
+            ? `${API_BASE}${d.playlist_url}`
+            : d.playlist_url;
+          setStreamUrl(playerUrl);
+        }
       })
       .catch(() => setStreamError("Failed to load stream. Is the backend running?"))
       .finally(() => setStreamLoading(false));
