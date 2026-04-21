@@ -1,4 +1,4 @@
-const APK_URL = "https://expo.dev/artifacts/eas/YOUR_APK_LINK_HERE.apk"; // replace after build
+const APK_URL = "https://expo.dev/artifacts/eas/jXbf3sw5JtwWdiBGAH6eqw.apk";
 const APP_VERSION = "1.0.0";
 
 export default function DownloadAppPage() {
