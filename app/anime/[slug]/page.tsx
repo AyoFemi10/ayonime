@@ -12,17 +12,20 @@ interface Episode {
   created_at: string;
 }
 
-async function getEpisodes(slug: string, title: string): Promise<Episode[]> {
+async function getEpisodes(slug: string, title: string): Promise<{ episodes: Episode[]; error?: string }> {
   try {
     const res = await fetch(
       `${API_BASE}/api/anime/${slug}/episodes?anime_name=${encodeURIComponent(title)}`,
       { cache: "no-store" }
     );
-    if (!res.ok) return [];
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: `HTTP ${res.status}` }));
+      return { episodes: [], error: err.detail || `HTTP ${res.status}` };
+    }
     const json = await res.json();
-    return json.data || [];
-  } catch {
-    return [];
+    return { episodes: json.data || [] };
+  } catch (e) {
+    return { episodes: [], error: "Backend unreachable. Is it running?" };
   }
 }
 
@@ -34,7 +37,7 @@ export default async function AnimePage({
   searchParams: { title?: string };
 }) {
   const title = searchParams.title || params.slug;
-  const episodes = await getEpisodes(params.slug, title);
+  const { episodes, error } = await getEpisodes(params.slug, title);
 
   return (
     <main className="max-w-7xl mx-auto px-3 sm:px-6 pt-20 sm:pt-28 pb-16 flex flex-col gap-6 sm:gap-8">
@@ -63,6 +66,7 @@ export default async function AnimePage({
             </svg>
           </div>
           <p className="text-ayo-muted text-lg font-semibold">No episodes found</p>
+          {error && <p className="text-red-400 text-sm font-mono">{error}</p>}
         </div>
       ) : (
         <EpisodeGrid episodes={episodes} slug={params.slug} title={title} />

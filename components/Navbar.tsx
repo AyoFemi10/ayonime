@@ -45,6 +45,10 @@ export default function Navbar() {
             </svg>
             Downloads
           </Link>
+          <Link href="/download-app" className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-ayo-gradient text-white font-bold text-xs ayo-glow hover:opacity-90 transition-opacity">
+            <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24"><path d="M17 1.01 7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z"/></svg>
+            Get App
+          </Link>
         </div>
 
         {/* Desktop search */}
@@ -113,6 +117,7 @@ export default function Navbar() {
           <Link href="/" className="text-ayo-muted hover:text-white text-sm" onClick={() => setMenuOpen(false)}>Home</Link>
           <Link href="/search?q=action" className="text-ayo-muted hover:text-white text-sm" onClick={() => setMenuOpen(false)}>Browse</Link>
           <Link href="/downloads" className="text-ayo-muted hover:text-white text-sm" onClick={() => setMenuOpen(false)}>Downloads</Link>
+          <Link href="/download-app" className="text-ayo-muted hover:text-white text-sm font-bold" onClick={() => setMenuOpen(false)}>📱 Get Android App</Link>
         </div>
       )}
     </nav>
