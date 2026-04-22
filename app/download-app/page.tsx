@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 
 const EAS_PROJECT_ID = "11309220-3a9e-43ba-a74f-a3e18facf2f3";
-const EXPO_ACCOUNT = "ayomikun-dev-corp";
+const EXPO_ACCOUNT = "ayomikundev";
 const FALLBACK_APK = "https://expo.dev/artifacts/eas/qQM6hhnDZeKyTnoe1fg7x6.apk";
 
 interface BuildInfo {
