@@ -15,7 +15,8 @@ interface BuildInfo {
 async function getLatestBuild(): Promise<BuildInfo> {
   try {
     const r = await fetch(
-      `https://api.expo.dev/v2/projects/${EAS_PROJECT_ID}/builds?platform=ANDROID&status=FINISHED&limit=1`
+      `https://api.expo.dev/v2/projects/${EAS_PROJECT_ID}/builds?platform=ANDROID&status=FINISHED&limit=1`,
+      { headers: { "expo-platform": "android" } }
     );
     const j = await r.json();
     const build = j.data?.[0];
