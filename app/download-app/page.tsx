@@ -1,4 +1,4 @@
-const APK_URL = "https://expo.dev/artifacts/eas/jXbf3sw5JtwWdiBGAH6eqw.apk";
+const APK_URL = "https://expo.dev/artifacts/eas/qQM6hhnDZeKyTnoe1fg7x6.apk";
 const RELEASES_URL = "https://expo.dev/accounts/ayomikun-dev-corp/projects/ayonime/builds";
 const APP_VERSION = "1.0.0";
 
