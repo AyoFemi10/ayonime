@@ -106,9 +106,9 @@ export default function WatchPage({ params }: { params: { slug: string; session:
       });
       const { job_id } = await r.json();
       // Save job ID to localStorage so downloads page shows only this user's jobs
-      try { 
-        const ids = JSON.parse(localStorage.getItem("ayonime_my_job_ids") || "[]");
-        if (!ids.includes(job_id)) { ids.push(job_id); localStorage.setItem("ayonime_my_job_ids", JSON.stringify(ids)); }
+      try {
+        const { saveMyJobId } = await import("@/lib/downloads");
+        saveMyJobId(job_id);
       } catch {}
       startPolling(job_id);
     } catch {

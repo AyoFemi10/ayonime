@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { getMyJobIds, removeMyJobId } from "@/lib/downloads";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-const MY_JOBS_KEY = "ayonime_my_job_ids";
 
 type DownloadStatus = "queued" | "resolving" | "downloading" | "compiling" | "done" | "failed";
 
@@ -36,23 +36,6 @@ const STATUS_LABEL: Record<DownloadStatus, string> = {
 };
 
 const ACTIVE = ["queued", "resolving", "downloading", "compiling"];
-
-// Helpers to read/write job IDs from localStorage
-function getMyJobIds(): string[] {
-  try { return JSON.parse(localStorage.getItem(MY_JOBS_KEY) || "[]"); } catch { return []; }
-}
-export function saveMyJobId(jobId: string) {
-  try {
-    const ids = getMyJobIds();
-    if (!ids.includes(jobId)) { ids.push(jobId); localStorage.setItem(MY_JOBS_KEY, JSON.stringify(ids)); }
-  } catch {}
-}
-function removeMyJobId(jobId: string) {
-  try {
-    const ids = getMyJobIds().filter((id) => id !== jobId);
-    localStorage.setItem(MY_JOBS_KEY, JSON.stringify(ids));
-  } catch {}
-}
 
 export default function DownloadsPage() {
   const [jobs, setJobs] = useState<DownloadJob[]>([]);
