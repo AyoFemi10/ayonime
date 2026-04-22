@@ -1,4 +1,4 @@
-"use client";
+"use client";don
 
 import { useEffect, useState } from "react";
 
@@ -14,8 +14,7 @@ interface BuildInfo {
 async function getLatestBuild(): Promise<BuildInfo | null> {
   try {
     const r = await fetch(
-      `https://api.expo.dev/v2/projects/${EAS_PROJECT_ID}/builds?platform=ANDROID&status=FINISHED&limit=1`,
-      { next: { revalidate: 300 } }
+      `https://api.expo.dev/v2/projects/${EAS_PROJECT_ID}/builds?platform=ANDROID&status=FINISHED&limit=1`
     );
     const j = await r.json();
     const build = j.data?.[0];
