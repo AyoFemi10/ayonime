@@ -1,4 +1,5 @@
-const APK_URL = "https://expo.dev/artifacts/eas/jXbf3sw5JtwWdiBGAH6eqw.apk";
+const APK_URL = "https://github.com/AyoFemi10/ayonime-app/releases/latest/download/AYONIME.apk";
+const RELEASES_URL = "https://github.com/AyoFemi10/ayonime-app/releases/latest";
 const APP_VERSION = "1.0.0";
 
 export default function DownloadAppPage() {
@@ -48,6 +49,9 @@ export default function DownloadAppPage() {
           Download APK
         </a>
         <p className="text-ayo-muted text-xs">Free · No account needed · Android 7.0+</p>
+        <a href={RELEASES_URL} target="_blank" rel="noreferrer" className="text-ayo-muted text-xs hover:text-ayo-accent transition-colors underline underline-offset-2">
+          View all releases on GitHub →
+        </a>
       </div>
 
       {/* Install instructions */}
