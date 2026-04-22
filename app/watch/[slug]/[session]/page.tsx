@@ -39,6 +39,22 @@ export default function WatchPage({ params }: { params: { slug: string; session:
   const [streamError, setStreamError] = useState("");
   const [quality, setQuality] = useState("best");
   const [audio, setAudio] = useState("jpn");
+  const [availableStreams, setAvailableStreams] = useState<{quality: string; audio: string}[]>([]);
+
+  // Fetch available qualities on mount
+  useEffect(() => {
+    fetch(`${API_BASE}/api/stream/qualities?anime_slug=${params.slug}&episode_session=${params.session}`)
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.streams?.length) {
+          setAvailableStreams(d.streams);
+          // Set defaults to best available
+          setQuality(d.streams[0].quality);
+          setAudio(d.streams[0].audio);
+        }
+      })
+      .catch(() => {});
+  }, [params.slug, params.session]);
 
   const [dlJob, setDlJob] = useState<DownloadJob | null>(null);
   const [dlStatus, setDlStatus] = useState<DownloadStatus>("idle");
@@ -230,7 +246,10 @@ export default function WatchPage({ params }: { params: { slug: string; session:
         <div className="flex items-center gap-2 sm:gap-3">
           <span className="text-ayo-muted text-xs uppercase tracking-wider font-semibold">Quality</span>
           <div className="flex gap-1 flex-wrap">
-            {QUALITIES.map((q) => (
+            {(availableStreams.length > 0
+              ? [...new Set(availableStreams.map((s) => s.quality))]
+              : ["best", "1080", "720", "480"]
+            ).map((q) => (
               <button key={q} onClick={() => setQuality(q)}
                 className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-bold transition-all ${quality === q ? "bg-ayo-gradient text-white ayo-glow" : "bg-ayo-surface border border-ayo-border text-ayo-muted hover:text-white hover:border-ayo-accent"}`}>
                 {q === "best" ? "Best" : `${q}p`}
@@ -242,10 +261,13 @@ export default function WatchPage({ params }: { params: { slug: string; session:
         <div className="flex items-center gap-2 sm:gap-3">
           <span className="text-ayo-muted text-xs uppercase tracking-wider font-semibold">Audio</span>
           <div className="flex gap-1">
-            {AUDIOS.map((a) => (
-              <button key={a.value} onClick={() => setAudio(a.value)}
-                className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-bold transition-all ${audio === a.value ? "bg-ayo-gradient text-white ayo-glow" : "bg-ayo-surface border border-ayo-border text-ayo-muted hover:text-white hover:border-ayo-accent"}`}>
-                {a.label}
+            {(availableStreams.length > 0
+              ? [...new Set(availableStreams.map((s) => s.audio))]
+              : ["jpn", "eng"]
+            ).map((a) => (
+              <button key={a} onClick={() => setAudio(a)}
+                className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-bold transition-all ${audio === a ? "bg-ayo-gradient text-white ayo-glow" : "bg-ayo-surface border border-ayo-border text-ayo-muted hover:text-white hover:border-ayo-accent"}`}>
+                {a === "jpn" ? "Japanese" : a === "eng" ? "English" : a}
               </button>
             ))}
           </div>
