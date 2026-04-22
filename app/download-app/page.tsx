@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 
 const EAS_PROJECT_ID = "11309220-3a9e-43ba-a74f-a3e18facf2f3";
 const EXPO_ACCOUNT = "ayomikun-dev-corp";
+const FALLBACK_APK = "https://expo.dev/artifacts/eas/qQM6hhnDZeKyTnoe1fg7x6.apk";
 
 interface BuildInfo {
   apkUrl: string;
@@ -11,35 +12,37 @@ interface BuildInfo {
   createdAt: string;
 }
 
-async function getLatestBuild(): Promise<BuildInfo | null> {
+async function getLatestBuild(): Promise<BuildInfo> {
   try {
     const r = await fetch(
       `https://api.expo.dev/v2/projects/${EAS_PROJECT_ID}/builds?platform=ANDROID&status=FINISHED&limit=1`
     );
     const j = await r.json();
     const build = j.data?.[0];
-    if (!build) return null;
-    return {
-      apkUrl: build.artifacts?.applicationArchiveUrl || "",
-      version: build.appVersion || "1.0.0",
-      createdAt: new Date(build.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }),
-    };
-  } catch {
-    return null;
-  }
+    if (build?.artifacts?.applicationArchiveUrl) {
+      return {
+        apkUrl: build.artifacts.applicationArchiveUrl,
+        version: build.appVersion || "1.0.0",
+        createdAt: new Date(build.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }),
+      };
+    }
+  } catch {}
+  return { apkUrl: FALLBACK_APK, version: "1.0.0", createdAt: "" };
 }
 
 export default function DownloadAppPage() {
-  const [build, setBuild] = useState<BuildInfo | null>(null);
+  const [build, setBuild] = useState<BuildInfo>({ apkUrl: "", version: "1.0.0", createdAt: "" });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     getLatestBuild().then(setBuild).finally(() => setLoading(false));
   }, []);
 
-  const apkUrl = build?.apkUrl || "";
-  const version = build?.version || "1.0.0";
-  const buildDate = build?.createdAt || "";
+  const apkUrl = build.apkUrl;
+  const version = build.version;
+  const buildDate = build.createdAt;
+  const version = build.version;
+  const buildDate = build.createdAt;
 
   return (
     <main className="max-w-2xl mx-auto px-4 pt-28 pb-20 flex flex-col items-center gap-10 text-center">
