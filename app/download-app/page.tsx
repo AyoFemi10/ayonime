@@ -41,8 +41,6 @@ export default function DownloadAppPage() {
   const apkUrl = build.apkUrl;
   const version = build.version;
   const buildDate = build.createdAt;
-  const version = build.version;
-  const buildDate = build.createdAt;
 
   return (
     <main className="max-w-2xl mx-auto px-4 pt-28 pb-20 flex flex-col items-center gap-10 text-center">
