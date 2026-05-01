@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { getMyJobIds, removeMyJobId } from "@/lib/downloads";
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+import { API_BASE, apiFetch } from "@/lib/api";
 
 type DownloadStatus = "queued" | "resolving" | "downloading" | "compiling" | "done" | "failed";
 
@@ -46,7 +45,7 @@ export default function DownloadsPage() {
     if (ids.length === 0) { setJobs([]); setLoading(false); return; }
 
     const results = await Promise.allSettled(
-      ids.map((id) => fetch(`${API_BASE}/api/download/${id}/status`).then((r) => r.ok ? r.json() : null))
+      ids.map((id) => apiFetch(`/api/download/${id}/status`).then((r) => r.ok ? r.json() : null))
     );
 
     const fetched: DownloadJob[] = results

@@ -1,12 +1,9 @@
 import AnimeCard, { AnimeProp } from "@/components/AnimeCard";
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+import { apiFetch } from "@/lib/api";
 
 async function searchAnime(q: string): Promise<AnimeProp[]> {
   try {
-    const res = await fetch(`${API_BASE}/api/search?q=${encodeURIComponent(q)}`, {
-      cache: "no-store",
-    });
+    const res = await apiFetch(`/api/search?q=${encodeURIComponent(q)}`, { cache: "no-store" });
     if (!res.ok) return [];
     const json = await res.json();
     return (json.data || []).map((item: any) => ({

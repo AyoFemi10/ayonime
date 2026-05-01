@@ -1,12 +1,11 @@
 import Hero from "@/components/Hero";
 import AnimeCard, { AnimeProp } from "@/components/AnimeCard";
 import LatestRelease from "@/components/LatestRelease";
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+import { apiFetch } from "@/lib/api";
 
 async function getAiring(): Promise<AnimeProp[]> {
   try {
-    const res = await fetch(`${API_BASE}/api/airing`, { next: { revalidate: 300 } });
+    const res = await apiFetch("/api/airing", { next: { revalidate: 300 } } as RequestInit);
     if (!res.ok) return [];
     const json = await res.json();
     return (json.data || []).map((item: any) => ({
@@ -23,7 +22,7 @@ async function getAiring(): Promise<AnimeProp[]> {
 
 async function getTopAnime(): Promise<AnimeProp[]> {
   try {
-    const res = await fetch(`${API_BASE}/api/top-anime`, { next: { revalidate: 3600 } });
+    const res = await apiFetch("/api/top-anime", { next: { revalidate: 3600 } } as RequestInit);
     if (!res.ok) return [];
     const json = await res.json();
     return (json.data || []).slice(0, 12).map((item: any) => ({

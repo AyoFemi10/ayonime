@@ -3,8 +3,7 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+import { API_BASE, apiFetch } from "@/lib/api";
 
 type DownloadStatus = "idle" | "queued" | "resolving" | "downloading" | "compiling" | "done" | "failed";
 
@@ -43,7 +42,7 @@ export default function WatchPage({ params }: { params: { slug: string; session:
 
   // Fetch available qualities on mount
   useEffect(() => {
-    fetch(`${API_BASE}/api/stream/qualities?anime_slug=${params.slug}&episode_session=${params.session}`)
+    apiFetch(`/api/stream/qualities?anime_slug=${params.slug}&episode_session=${params.session}`)
       .then((r) => r.json())
       .then((d) => {
         if (d.streams?.length) {
@@ -65,8 +64,8 @@ export default function WatchPage({ params }: { params: { slug: string; session:
     setStreamLoading(true);
     setStreamError("");
     setStreamUrl(null);
-    fetch(
-      `${API_BASE}/api/stream?anime_slug=${params.slug}&episode_session=${params.session}&quality=${quality}&audio=${audio}`
+    apiFetch(
+      `/api/stream?anime_slug=${params.slug}&episode_session=${params.session}&quality=${quality}&audio=${audio}`
     )
       .then((r) => r.json())
       .then((d) => {
@@ -89,7 +88,7 @@ export default function WatchPage({ params }: { params: { slug: string; session:
     if (pollRef.current) clearInterval(pollRef.current);
     pollRef.current = setInterval(async () => {
       try {
-        const r = await fetch(`${API_BASE}/api/download/${jobId}/status`);
+        const r = await apiFetch(`/api/download/${jobId}/status`);
         if (!r.ok) { clearInterval(pollRef.current!); setDlStatus("failed"); return; }
         const job: DownloadJob = await r.json();
         setDlJob(job);
@@ -108,7 +107,7 @@ export default function WatchPage({ params }: { params: { slug: string; session:
     }
     setDlStatus("queued");
     try {
-      const r = await fetch(`${API_BASE}/api/download`, {
+      const r = await apiFetch(`/api/download`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -207,7 +206,7 @@ export default function WatchPage({ params }: { params: { slug: string; session:
                 setStreamLoading(true);
                 setStreamError("");
                 setStreamUrl(null);
-                fetch(`${API_BASE}/api/stream?anime_slug=${params.slug}&episode_session=${params.session}&quality=${quality}&audio=${audio}`)
+                apiFetch(`/api/stream?anime_slug=${params.slug}&episode_session=${params.session}&quality=${quality}&audio=${audio}`)
                   .then((r) => r.json())
                   .then((d) => {
                     if (d.detail) setStreamError(d.detail);

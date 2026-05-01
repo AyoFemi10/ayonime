@@ -1,7 +1,6 @@
 import Link from "next/link";
 import EpisodeGrid from "@/components/EpisodeGrid";
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+import { apiFetch } from "@/lib/api";
 
 interface Episode {
   id: number;
@@ -14,8 +13,8 @@ interface Episode {
 
 async function getEpisodes(slug: string, title: string): Promise<{ episodes: Episode[]; error?: string }> {
   try {
-    const res = await fetch(
-      `${API_BASE}/api/anime/${slug}/episodes?anime_name=${encodeURIComponent(title)}`,
+    const res = await apiFetch(
+      `/api/anime/${slug}/episodes?anime_name=${encodeURIComponent(title)}`,
       { cache: "no-store" }
     );
     if (!res.ok) {

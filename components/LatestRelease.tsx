@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from "react";
 import AnimeCard, { AnimeProp } from "./AnimeCard";
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+import { apiFetch } from "@/lib/api";
 
 interface PageData {
   data: any[];
@@ -18,7 +17,7 @@ export default function LatestRelease() {
 
   useEffect(() => {
     setLoading(true);
-    fetch(`${API_BASE}/api/latest-release?page=${page}`)
+    apiFetch(`/api/latest-release?page=${page}`)
       .then((r) => r.json())
       .then((d) => setPageData(d))
       .catch(() => setPageData(null))
