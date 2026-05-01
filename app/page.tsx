@@ -5,7 +5,7 @@ import { apiFetch } from "@/lib/api";
 
 async function getAiring(): Promise<AnimeProp[]> {
   try {
-    const res = await apiFetch("/api/airing", { next: { revalidate: 300 } } as RequestInit);
+    const res = await apiFetch("/api/airing", { next: { revalidate: 300 } });
     if (!res.ok) return [];
     const json = await res.json();
     return (json.data || []).map((item: any) => ({
@@ -22,7 +22,7 @@ async function getAiring(): Promise<AnimeProp[]> {
 
 async function getTopAnime(): Promise<AnimeProp[]> {
   try {
-    const res = await apiFetch("/api/top-anime", { next: { revalidate: 3600 } } as RequestInit);
+    const res = await apiFetch("/api/top-anime", { next: { revalidate: 3600 } });
     if (!res.ok) return [];
     const json = await res.json();
     return (json.data || []).slice(0, 12).map((item: any) => ({

@@ -3,7 +3,7 @@ const API_KEY = process.env.NEXT_PUBLIC_API_KEY || "";
 
 export { API_BASE };
 
-export function apiFetch(path: string, init: RequestInit = {}): Promise<Response> {
+export function apiFetch(path: string, init: Record<string, any> = {}): Promise<Response> {
   const headers: Record<string, string> = {
     ...(init.headers as Record<string, string>),
   };
