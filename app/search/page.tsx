@@ -7,11 +7,11 @@ async function searchAnime(q: string): Promise<AnimeProp[]> {
     if (!res.ok) return [];
     const json = await res.json();
     return (json.data || []).map((item: any) => ({
-      session: item.session,
-      title: item.title,
-      poster: item.poster,
-      type: item.type,
-      episodes: item.episodes,
+      session: item.session || item.anime_session,
+      title: item.title || item.anime_title,
+      poster: item.poster || item.snapshot,
+      type: item.type || "TV",
+      episodes: item.episodes || item.episode,
       score: item.score,
     }));
   } catch {

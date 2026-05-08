@@ -25,11 +25,11 @@ export default function LatestRelease() {
   }, [page]);
 
   const items: AnimeProp[] = (pageData?.data || []).map((item: any) => ({
-    session: item.anime_session,
-    title: item.anime_title,
-    poster: item.snapshot,
-    type: item.fansub || "TV",
-    episodes: item.episode,
+    session: item.anime_session || item.session,
+    title: item.anime_title || item.title,
+    poster: item.snapshot || item.poster,
+    type: item.fansub || item.type || "TV",
+    episodes: item.episode || item.episodes,
   }));
 
   const lastPage = pageData?.last_page || 1;
