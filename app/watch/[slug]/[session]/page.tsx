@@ -71,11 +71,12 @@ export default function WatchPage({ params }: { params: { slug: string; session:
       .then((d) => {
         if (d.detail) setStreamError(d.detail);
         else {
-          const playerUrl = d.stream_url?.startsWith("/")
-            ? `${API_BASE}${d.stream_url}`
-            : d.stream_url;
-          setStreamUrl(playerUrl);
-          // Save last watched episode for this anime
+          // kwik_url is returned directly — embed it in an iframe so the
+          // browser handles the Cloudflare challenge itself
+          const playerUrl = d.kwik_url || d.stream_url;
+          if (!playerUrl) { setStreamError("No stream URL returned"); return; }
+          const finalUrl = playerUrl.startsWith("/") ? `${API_BASE}${playerUrl}` : playerUrl;
+          setStreamUrl(finalUrl);
           try { localStorage.setItem(`last_watched_${params.slug}`, params.session); } catch {}
         }
       })
@@ -211,8 +212,10 @@ export default function WatchPage({ params }: { params: { slug: string; session:
                   .then((d) => {
                     if (d.detail) setStreamError(d.detail);
                     else {
-                      const playerUrl = d.stream_url?.startsWith("/") ? `${API_BASE}${d.stream_url}` : d.stream_url;
-                      setStreamUrl(playerUrl);
+                      const playerUrl = d.kwik_url || d.stream_url;
+                      if (!playerUrl) { setStreamError("No stream URL returned"); return; }
+                      const finalUrl = playerUrl.startsWith("/") ? `${API_BASE}${playerUrl}` : playerUrl;
+                      setStreamUrl(finalUrl);
                       try { localStorage.setItem(`last_watched_${params.slug}`, params.session); } catch {}
                     }
                   })
