@@ -39,6 +39,7 @@ export default function WatchPage({ params }: { params: { slug: string; session:
   const [quality, setQuality] = useState("best");
   const [audio, setAudio] = useState("jpn");
   const [availableStreams, setAvailableStreams] = useState<{quality: string; audio: string}[]>([]);
+  const userSelectedRef = useRef(false);
 
   // Fetch available qualities on mount
   useEffect(() => {
@@ -47,9 +48,11 @@ export default function WatchPage({ params }: { params: { slug: string; session:
       .then((d) => {
         if (d.streams?.length) {
           setAvailableStreams(d.streams);
-          // Set defaults to best available
-          setQuality(d.streams[0].quality);
-          setAudio(d.streams[0].audio);
+          // Only set defaults if user hasn't manually selected
+          if (!userSelectedRef.current) {
+            setQuality(d.streams[0].quality);
+            setAudio(d.streams[0].audio);
+          }
         }
       })
       .catch(() => {});
@@ -252,7 +255,7 @@ export default function WatchPage({ params }: { params: { slug: string; session:
               ? [...new Set(availableStreams.map((s) => s.quality))]
               : ["best", "1080", "720", "480"]
             ).map((q) => (
-              <button key={q} onClick={() => setQuality(q)}
+              <button key={q} onClick={() => { userSelectedRef.current = true; setQuality(q); }}
                 className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-bold transition-all ${quality === q ? "bg-ayo-gradient text-white ayo-glow" : "bg-ayo-surface border border-ayo-border text-ayo-muted hover:text-white hover:border-ayo-accent"}`}>
                 {q === "best" ? "Best" : `${q}p`}
               </button>
@@ -267,7 +270,7 @@ export default function WatchPage({ params }: { params: { slug: string; session:
               ? [...new Set(availableStreams.map((s) => s.audio))]
               : ["jpn", "eng"]
             ).map((a) => (
-              <button key={a} onClick={() => setAudio(a)}
+              <button key={a} onClick={() => { userSelectedRef.current = true; setAudio(a); }}
                 className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-bold transition-all ${audio === a ? "bg-ayo-gradient text-white ayo-glow" : "bg-ayo-surface border border-ayo-border text-ayo-muted hover:text-white hover:border-ayo-accent"}`}>
                 {a === "jpn" ? "Japanese" : a === "eng" ? "English" : a}
               </button>
